@@ -12,6 +12,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="flex h-screen bg-background">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="bg-blue-900 text-white text-xs py-1 px-6 text-center">
+          LAW ENFORCEMENT RESTRICTED - AUTHORIZED PERSONNEL ONLY - CASE EVIDENCE SYSTEM
+        </div>
         <Header />
         <main className="flex-1 overflow-auto p-6">
           {children}

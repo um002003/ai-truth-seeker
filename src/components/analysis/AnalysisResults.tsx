@@ -15,7 +15,8 @@ import {
   FileSpreadsheet,
   Share2,
   Shield,
-  X
+  X,
+  Info
 } from 'lucide-react';
 
 // Define the types for analysis results
@@ -23,6 +24,14 @@ interface AnalysisDetail {
   name: string;
   score: number;
   description: string;
+}
+
+interface ModelInfo {
+  name: string;
+  version: string;
+  confidence: number;
+  specialization: string;
+  datasetTraining: string[];
 }
 
 interface AnalysisResult {
@@ -34,6 +43,7 @@ interface AnalysisResult {
   isDeepfake: boolean;
   confidenceScore: number;
   processingTime: string;
+  modelInfo: ModelInfo[];
   analysisDetails: {
     facial: AnalysisDetail[];
     metadata: AnalysisDetail[];
@@ -65,6 +75,29 @@ const generateMockAnalysis = (file: File): Promise<AnalysisResult> => {
         isDeepfake: isDeepfake,
         confidenceScore: Number(confidenceScore.toFixed(1)),
         processingTime: `${(1 + Math.random() * 4).toFixed(1)} seconds`,
+        modelInfo: [
+          {
+            name: "DeepfaceForensics++",
+            version: "v3.2.1",
+            confidence: isDeepfake ? 82.7 : 17.3,
+            specialization: "Facial manipulation detection",
+            datasetTraining: ["FaceForensics++", "DFDC", "Celeb-DF"]
+          },
+          {
+            name: "LAMA-Detector",
+            version: "v2.0.5",
+            confidence: isDeepfake ? 76.3 : 23.7,
+            specialization: "Large Mask removal artifacts",
+            datasetTraining: ["WildDeepfake", "DeepfakeFFPP", "ForgeryNet"]
+          },
+          {
+            name: "TemporalConsistency",
+            version: "v1.8.3",
+            confidence: isDeepfake ? 79.5 : 20.5,
+            specialization: "Video frame temporal inconsistencies",
+            datasetTraining: ["DFDC", "DeeperForensics-1.0", "FaceShifter"]
+          }
+        ],
         analysisDetails: {
           facial: [
             {
@@ -132,6 +165,7 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [progress, setProgress] = useState(0);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [activeModelTab, setActiveModelTab] = useState<string>("model1");
 
   useEffect(() => {
     if (!file) return;
@@ -174,7 +208,7 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
         <CardHeader className="text-center">
           <CardTitle>Processing Evidence</CardTitle>
           <CardDescription>
-            Running advanced deepfake detection analysis
+            Running advanced multi-model deepfake detection analysis
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -187,7 +221,10 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
             </div>
             <Progress value={progress} className="w-full max-w-md h-2 mt-4" />
             <p className="text-sm text-muted-foreground mt-2">
-              {progress < 100 ? 'Analyzing file patterns...' : 'Finalizing results...'}
+              {progress < 30 ? 'Initializing neural network models...' : 
+               progress < 60 ? 'Analyzing facial features and patterns...' : 
+               progress < 90 ? 'Processing temporal inconsistencies...' :
+               'Finalizing results and generating report...'}
             </p>
           </div>
         </CardContent>
@@ -269,8 +306,8 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
           </div>
           <AlertDescription className="mt-2">
             {analysis.isDeepfake ? 
-              `Our analysis indicates this content is likely manipulated with ${analysis.confidenceScore}% confidence.` : 
-              `Our analysis indicates this content is likely authentic with ${100 - analysis.confidenceScore}% confidence.`
+              `Our ensemble AI models indicate this content is likely manipulated with ${analysis.confidenceScore}% confidence.` : 
+              `Our ensemble AI models indicate this content is likely authentic with ${100 - analysis.confidenceScore}% confidence.`
             }
           </AlertDescription>
         </Alert>
@@ -289,6 +326,55 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
             <Clock className="inline h-3 w-3 mr-1" />
             Last updated: {new Date(analysis.uploadDate).toLocaleString()}
           </p>
+        </div>
+
+        {/* AI Model Information */}
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+          <h3 className="font-medium text-blue-800 mb-4 flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            AI Model Ensemble Analysis
+          </h3>
+          
+          <Tabs defaultValue={`model0`} className="w-full">
+            <TabsList className="grid grid-cols-3 mb-4">
+              {analysis.modelInfo.map((model, idx) => (
+                <TabsTrigger key={idx} value={`model${idx}`}>
+                  {model.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            
+            {analysis.modelInfo.map((model, idx) => (
+              <TabsContent key={idx} value={`model${idx}`} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Model Version</p>
+                    <p>{model.version}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Confidence Score</p>
+                    <p className={`px-2 py-1 rounded-full text-xs inline-flex items-center ${scoreColor(model.confidence)}`}>
+                      {model.confidence.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Specialization</p>
+                    <p>{model.specialization}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Training Datasets</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {model.datasetTraining.map((dataset, i) => (
+                        <Badge key={i} variant="outline" className="text-xs">
+                          {dataset}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
         </div>
 
         {analysis.anomalies.length > 0 && (
