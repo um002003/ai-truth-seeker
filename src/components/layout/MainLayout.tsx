@@ -15,6 +15,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <div className="bg-blue-900 text-white text-xs py-1 px-6 text-center">
           LAW ENFORCEMENT RESTRICTED - AUTHORIZED PERSONNEL ONLY - CASE EVIDENCE SYSTEM
         </div>
+        <div className="bg-blue-800 text-white text-[10px] py-0.5 px-6 text-center">
+          DIGITAL FORENSICS DIVISION - DEEPFAKE ANALYSIS UNIT
+        </div>
         <Header />
         <main className="flex-1 overflow-auto p-6">
           {children}

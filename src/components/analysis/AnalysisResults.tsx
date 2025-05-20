@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -18,15 +17,16 @@ import {
   X,
   Info
 } from 'lucide-react';
+import LEAReport from '../reports/LEAReport';
 
 // Define the types for analysis results
-interface AnalysisDetail {
+export interface AnalysisDetail {
   name: string;
   score: number;
   description: string;
 }
 
-interface ModelInfo {
+export interface ModelInfo {
   name: string;
   version: string;
   confidence: number;
@@ -34,7 +34,7 @@ interface ModelInfo {
   datasetTraining: string[];
 }
 
-interface AnalysisResult {
+export interface AnalysisResult {
   id: string;
   filename: string;
   fileType: 'image' | 'video';
@@ -166,6 +166,7 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
   const [progress, setProgress] = useState(0);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [activeModelTab, setActiveModelTab] = useState<string>("model1");
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     if (!file) return;
@@ -247,6 +248,24 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
     if (score < 80) return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200">High Risk</Badge>;
     return <Badge className="bg-red-100 text-red-700 hover:bg-red-200">Critical Risk</Badge>;
   };
+
+  if (showReport) {
+    return (
+      <>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowReport(false)}
+            className="flex items-center gap-2"
+          >
+            <X className="h-4 w-4" />
+            Back to Analysis
+          </Button>
+        </div>
+        <LEAReport analysisResult={analysis} />
+      </>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -453,9 +472,17 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
 
         <Separator />
 
-        {/* Actions Row */}
+        {/* Actions Row with added LEA Report button */}
         <div className="flex flex-wrap justify-between items-center pt-2">
           <div className="flex gap-2">
+            <Button 
+              variant="default" 
+              className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800"
+              onClick={() => setShowReport(true)}
+            >
+              <Shield className="h-4 w-4" />
+              Generate LEA Report
+            </Button>
             <Button variant="outline" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Download Report
