@@ -358,23 +358,25 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
         </CardContent>
       </Card>
 
-      <style jsx>{`
-        @media print {
-          body * {
-            visibility: hidden;
+      <style>
+        {`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .law-enforcement-report,
+            .law-enforcement-report * {
+              visibility: visible;
+            }
+            .law-enforcement-report {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
           }
-          .law-enforcement-report,
-          .law-enforcement-report * {
-            visibility: visible;
-          }
-          .law-enforcement-report {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
