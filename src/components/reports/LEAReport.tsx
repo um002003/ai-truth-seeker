@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { FileDown, Printer, FileText, ShieldAlert } from 'lucide-react';
+import { FileDown, Printer, FileText, ShieldAlert, FileAudio } from 'lucide-react';
 import { AnalysisResult } from '@/components/analysis/AnalysisResults';
 
 interface LEAReportProps {
@@ -42,6 +42,8 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
     alert("In a production environment, this would generate a PDF for download.");
   };
 
+  const isAudio = analysisResult.fileType === 'audio';
+
   return (
     <div className="law-enforcement-report print:bg-white print:p-10">
       <div className="print:hidden mb-4 flex justify-between items-center">
@@ -74,11 +76,17 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
           <div className="flex justify-between items-center">
             <div>
               <div className="text-xs uppercase text-blue-600 font-semibold mb-1">Confidential - Law Enforcement Use Only</div>
-              <CardTitle className="text-xl">Digital Content Forensics Report</CardTitle>
+              <CardTitle className="text-xl">
+                {isAudio ? "Audio Forensics Report" : "Digital Content Forensics Report"}
+              </CardTitle>
               <div className="text-sm text-muted-foreground mt-1">Report generated on {currentDate}</div>
             </div>
             <div className="flex items-center gap-2">
-              <ShieldAlert className="text-blue-600 h-10 w-10" />
+              {isAudio ? (
+                <FileAudio className="text-blue-600 h-10 w-10" />
+              ) : (
+                <ShieldAlert className="text-blue-600 h-10 w-10" />
+              )}
               <div className="text-right">
                 <div className="text-sm font-semibold">Case Ref:</div>
                 <div className="text-base">{caseNumber}</div>
@@ -132,9 +140,18 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
                 )}
                 <div>
                   {analysisResult.isDeepfake ? (
-                    <p>The submitted digital media has been analyzed and determined to be manipulated with a confidence level of {analysisResult.confidenceScore}%. Multiple detection models indicate synthetic generation or digital manipulation techniques have been applied to this content.</p>
+                    <p>
+                      The submitted {isAudio ? "audio" : "digital media"} has been analyzed and determined 
+                      to be manipulated with a confidence level of {analysisResult.confidenceScore}%. 
+                      Multiple detection models indicate synthetic generation or digital manipulation 
+                      techniques have been applied to this content.
+                    </p>
                   ) : (
-                    <p>The submitted digital media has been analyzed and appears to be authentic with a confidence level of {(100 - analysisResult.confidenceScore).toFixed(1)}%. No significant indicators of manipulation were detected by the analysis models.</p>
+                    <p>
+                      The submitted {isAudio ? "audio" : "digital media"} has been analyzed and appears 
+                      to be authentic with a confidence level of {(100 - analysisResult.confidenceScore).toFixed(1)}%. 
+                      No significant indicators of manipulation were detected by the analysis models.
+                    </p>
                   )}
                 </div>
               </div>
@@ -196,34 +213,90 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
             <h3 className="text-lg font-semibold mb-3">4. Detection Category Analysis</h3>
             
             <div className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">4.1 Facial Analysis</h4>
-                <table className="min-w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th className="text-left p-2 border">Detection Method</th>
-                      <th className="text-left p-2 border">Confidence Score</th>
-                      <th className="text-left p-2 border">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analysisResult.analysisDetails.facial.map((detail, idx) => (
-                      <tr key={idx}>
-                        <td className="p-2 border">{detail.name}</td>
-                        <td className="p-2 border">
-                          <Badge className={`${detail.score > 50 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                            {detail.score.toFixed(1)}%
-                          </Badge>
-                        </td>
-                        <td className="p-2 border">{detail.description}</td>
+              {isAudio ? (
+                <div>
+                  <h4 className="font-medium mb-2">4.1 Audio Analysis</h4>
+                  <table className="min-w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="text-left p-2 border">Detection Method</th>
+                        <th className="text-left p-2 border">Confidence Score</th>
+                        <th className="text-left p-2 border">Description</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {analysisResult.analysisDetails.audio?.map((detail, idx) => (
+                        <tr key={idx}>
+                          <td className="p-2 border">{detail.name}</td>
+                          <td className="p-2 border">
+                            <Badge className={`${detail.score > 50 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                              {detail.score.toFixed(1)}%
+                            </Badge>
+                          </td>
+                          <td className="p-2 border">{detail.description}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <h4 className="font-medium mb-2">4.1 Facial Analysis</h4>
+                    <table className="min-w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-muted">
+                          <th className="text-left p-2 border">Detection Method</th>
+                          <th className="text-left p-2 border">Confidence Score</th>
+                          <th className="text-left p-2 border">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysisResult.analysisDetails.facial?.map((detail, idx) => (
+                          <tr key={idx}>
+                            <td className="p-2 border">{detail.name}</td>
+                            <td className="p-2 border">
+                              <Badge className={`${detail.score > 50 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                {detail.score.toFixed(1)}%
+                              </Badge>
+                            </td>
+                            <td className="p-2 border">{detail.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-2">4.2 Visual Analysis</h4>
+                    <table className="min-w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-muted">
+                          <th className="text-left p-2 border">Detection Method</th>
+                          <th className="text-left p-2 border">Confidence Score</th>
+                          <th className="text-left p-2 border">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysisResult.analysisDetails.visual?.map((detail, idx) => (
+                          <tr key={idx}>
+                            <td className="p-2 border">{detail.name}</td>
+                            <td className="p-2 border">
+                              <Badge className={`${detail.score > 50 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                {detail.score.toFixed(1)}%
+                              </Badge>
+                            </td>
+                            <td className="p-2 border">{detail.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
               
               <div>
-                <h4 className="font-medium mb-2">4.2 Visual Analysis</h4>
+                <h4 className="font-medium mb-2">{isAudio ? '4.2 Metadata Analysis' : '4.3 Metadata Analysis'}</h4>
                 <table className="min-w-full border-collapse text-sm">
                   <thead>
                     <tr className="bg-muted">
@@ -233,33 +306,7 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {analysisResult.analysisDetails.visual.map((detail, idx) => (
-                      <tr key={idx}>
-                        <td className="p-2 border">{detail.name}</td>
-                        <td className="p-2 border">
-                          <Badge className={`${detail.score > 50 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                            {detail.score.toFixed(1)}%
-                          </Badge>
-                        </td>
-                        <td className="p-2 border">{detail.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">4.3 Metadata Analysis</h4>
-                <table className="min-w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th className="text-left p-2 border">Detection Method</th>
-                      <th className="text-left p-2 border">Confidence Score</th>
-                      <th className="text-left p-2 border">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analysisResult.analysisDetails.metadata.map((detail, idx) => (
+                    {analysisResult.analysisDetails.metadata?.map((detail, idx) => (
                       <tr key={idx}>
                         <td className="p-2 border">{detail.name}</td>
                         <td className="p-2 border">
@@ -311,24 +358,25 @@ const LEAReport = ({ analysisResult }: LEAReportProps) => {
         </CardContent>
       </Card>
 
-      {/* Print-specific styles */}
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
+      <style jsx global>
+        {`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .law-enforcement-report,
+            .law-enforcement-report * {
+              visibility: visible;
+            }
+            .law-enforcement-report {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
           }
-          .law-enforcement-report,
-          .law-enforcement-report * {
-            visibility: visible;
-          }
-          .law-enforcement-report {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };

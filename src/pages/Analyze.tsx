@@ -4,13 +4,16 @@ import MainLayout from '@/components/layout/MainLayout';
 import FileUploader from '@/components/upload/FileUploader';
 import AnalysisResults from '@/components/analysis/AnalysisResults';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield } from 'lucide-react';
+import { Shield, FileAudio, FileVideo } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Analyze = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [mediaType, setMediaType] = useState<'visual' | 'audio'>('visual');
   
   const handleFileSelected = (file: File) => {
     setSelectedFile(file);
+    setMediaType(file.type.includes('audio') ? 'audio' : 'visual');
   };
   
   const handleReset = () => {
@@ -25,23 +28,68 @@ const Analyze = () => {
             <div className="mb-6">
               <h1 className="text-2xl font-bold mb-2">Upload Media for Analysis</h1>
               <p className="text-muted-foreground">
-                Upload an image or video file to analyze for potential deepfake manipulation. 
-                Our AI-powered system will process the file and provide detailed results with official law enforcement reports.
+                Upload an image, video, or audio file to analyze for potential deepfake manipulation. 
+                Our multi-model AI system processes the file and provides detailed results with official law enforcement reports.
               </p>
             </div>
             
-            <FileUploader onFileSelected={handleFileSelected} />
+            <Tabs defaultValue="visual" className="mb-6">
+              <TabsList className="grid grid-cols-2 mb-4 w-[400px]">
+                <TabsTrigger value="visual" onClick={() => setMediaType('visual')}>
+                  <FileVideo className="h-4 w-4 mr-2" />
+                  Visual Media
+                </TabsTrigger>
+                <TabsTrigger value="audio" onClick={() => setMediaType('audio')}>
+                  <FileAudio className="h-4 w-4 mr-2" />
+                  Audio
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="visual" className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Upload images or videos to detect visual deepfakes. Our system will analyze facial manipulation, 
+                  inconsistencies between frames, lighting anomalies, and metadata.
+                </p>
+                <FileUploader 
+                  onFileSelected={handleFileSelected} 
+                  acceptedFileTypes={".jpg,.jpeg,.png,.webp,.mp4,.mov,.avi"} 
+                />
+              </TabsContent>
+              
+              <TabsContent value="audio" className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Upload audio files to detect voice deepfakes. Our system will analyze voice patterns,
+                  spectral inconsistencies, synthesis artifacts, and temporal anomalies.
+                </p>
+                <FileUploader 
+                  onFileSelected={handleFileSelected} 
+                  acceptedFileTypes={".mp3,.wav,.ogg,.flac"} 
+                />
+              </TabsContent>
+            </Tabs>
             
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Supported File Types</CardTitle>
+                  <CardTitle className="text-base">
+                    {mediaType === 'visual' ? 'Supported Visual File Types' : 'Supported Audio File Types'}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>Images: JPEG, PNG, WEBP</li>
-                    <li>Videos: MP4, MOV, AVI</li>
-                    <li>Maximum file size: 100MB</li>
+                    {mediaType === 'visual' ? (
+                      <>
+                        <li>Images: JPEG, PNG, WEBP</li>
+                        <li>Videos: MP4, MOV, AVI</li>
+                        <li>Maximum file size: 100MB</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Audio: MP3, WAV, OGG, FLAC</li>
+                        <li>Maximum file size: 50MB</li>
+                        <li>Maximum duration: 10 minutes</li>
+                      </>
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -52,10 +100,21 @@ const Analyze = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>Facial manipulation detection</li>
-                    <li>Video inconsistency analysis</li>
-                    <li>Metadata examination</li>
+                    {mediaType === 'visual' ? (
+                      <>
+                        <li>Facial manipulation detection</li>
+                        <li>Video inconsistency analysis</li>
+                        <li>Metadata examination</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Voice synthesis detection</li>
+                        <li>Spectral analysis</li>
+                        <li>Temporal pattern analysis</li>
+                      </>
+                    )}
                     <li>Confidence scoring</li>
+                    <li>Multi-model AI analysis</li>
                     <li>LEA-compliant forensic reports</li>
                   </ul>
                 </CardContent>
@@ -81,7 +140,7 @@ const Analyze = () => {
             </Card>
           </>
         ) : (
-          <AnalysisResults file={selectedFile} onReset={handleReset} />
+          <AnalysisResults file={selectedFile} onReset={handleReset} mediaType={mediaType} />
         )}
       </div>
     </MainLayout>

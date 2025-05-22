@@ -15,7 +15,8 @@ import {
   Share2,
   Shield,
   X,
-  Info
+  Info,
+  FileAudio
 } from 'lucide-react';
 import LEAReport from '../reports/LEAReport';
 
@@ -37,7 +38,7 @@ export interface ModelInfo {
 export interface AnalysisResult {
   id: string;
   filename: string;
-  fileType: 'image' | 'video';
+  fileType: 'image' | 'video' | 'audio';
   fileSize: string;
   uploadDate: string;
   isDeepfake: boolean;
@@ -45,9 +46,10 @@ export interface AnalysisResult {
   processingTime: string;
   modelInfo: ModelInfo[];
   analysisDetails: {
-    facial: AnalysisDetail[];
-    metadata: AnalysisDetail[];
-    visual: AnalysisDetail[];
+    facial?: AnalysisDetail[];
+    metadata?: AnalysisDetail[];
+    visual?: AnalysisDetail[];
+    audio?: AnalysisDetail[];
   };
   anomalies: string[];
 }
@@ -55,10 +57,11 @@ export interface AnalysisResult {
 interface AnalysisResultsProps {
   file: File | null;
   onReset: () => void;
+  mediaType?: 'visual' | 'audio';
 }
 
 // This is a mock analysis function that would be replaced with actual AI processing
-const generateMockAnalysis = (file: File): Promise<AnalysisResult> => {
+const generateMockAnalysis = (file: File, mediaType: 'visual' | 'audio' = 'visual'): Promise<AnalysisResult> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const isDeepfake = Math.random() > 0.5;
@@ -66,106 +69,188 @@ const generateMockAnalysis = (file: File): Promise<AnalysisResult> => {
         ? 70 + Math.random() * 25 
         : 15 + Math.random() * 20;
       
-      const result: AnalysisResult = {
-        id: `AF-${Date.now().toString(36)}`,
-        filename: file.name,
-        fileType: file.type.includes('image') ? 'image' : 'video',
-        fileSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-        uploadDate: new Date().toISOString(),
-        isDeepfake: isDeepfake,
-        confidenceScore: Number(confidenceScore.toFixed(1)),
-        processingTime: `${(1 + Math.random() * 4).toFixed(1)} seconds`,
-        modelInfo: [
-          {
-            name: "DeepfaceForensics++",
-            version: "v3.2.1",
-            confidence: isDeepfake ? 82.7 : 17.3,
-            specialization: "Facial manipulation detection",
-            datasetTraining: ["FaceForensics++", "DFDC", "Celeb-DF"]
-          },
-          {
-            name: "LAMA-Detector",
-            version: "v2.0.5",
-            confidence: isDeepfake ? 76.3 : 23.7,
-            specialization: "Large Mask removal artifacts",
-            datasetTraining: ["WildDeepfake", "DeepfakeFFPP", "ForgeryNet"]
-          },
-          {
-            name: "TemporalConsistency",
-            version: "v1.8.3",
-            confidence: isDeepfake ? 79.5 : 20.5,
-            specialization: "Video frame temporal inconsistencies",
-            datasetTraining: ["DFDC", "DeeperForensics-1.0", "FaceShifter"]
-          }
-        ],
-        analysisDetails: {
-          facial: [
+      if (mediaType === 'audio') {
+        const result: AnalysisResult = {
+          id: `AF-${Date.now().toString(36)}`,
+          filename: file.name,
+          fileType: 'audio',
+          fileSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+          uploadDate: new Date().toISOString(),
+          isDeepfake: isDeepfake,
+          confidenceScore: Number(confidenceScore.toFixed(1)),
+          processingTime: `${(1 + Math.random() * 4).toFixed(1)} seconds`,
+          modelInfo: [
             {
-              name: 'Face Inconsistency',
-              score: isDeepfake ? 65 + Math.random() * 30 : 10 + Math.random() * 20,
-              description: 'Analysis of facial structure and features consistency between frames'
+              name: "WaveFake",
+              version: "v2.1.3",
+              confidence: isDeepfake ? 83.2 : 18.7,
+              specialization: "Audio synthesis detection",
+              datasetTraining: ["ASVspoof", "FakeAVCeleb-Audio", "WaveFake"]
             },
             {
-              name: 'Eye Blinking',
-              score: isDeepfake ? 70 + Math.random() * 25 : 5 + Math.random() * 15,
-              description: 'Detection of natural eye blinking patterns'
+              name: "VoicePrint",
+              version: "v1.5.2",
+              confidence: isDeepfake ? 75.8 : 22.4,
+              specialization: "Voice biometric verification",
+              datasetTraining: ["VCTK", "LibriSpeech", "VoxCeleb"]
             },
             {
-              name: 'Lip Sync',
-              score: isDeepfake ? 60 + Math.random() * 35 : 5 + Math.random() * 10,
-              description: 'Analysis of lip movement synchronization with audio'
+              name: "SpectroGuard",
+              version: "v2.0.1",
+              confidence: isDeepfake ? 80.3 : 19.5,
+              specialization: "Spectral inconsistency detection",
+              datasetTraining: ["ASVspoof", "FakeOrReal", "DeepVoiceMine"]
             }
           ],
-          metadata: [
+          analysisDetails: {
+            audio: [
+              {
+                name: 'Spectral Analysis',
+                score: isDeepfake ? 65 + Math.random() * 30 : 10 + Math.random() * 20,
+                description: 'Analysis of audio spectral features and anomalies'
+              },
+              {
+                name: 'Temporal Patterns',
+                score: isDeepfake ? 70 + Math.random() * 25 : 5 + Math.random() * 15,
+                description: 'Detection of natural voice rhythm and patterns'
+              },
+              {
+                name: 'Phoneme Transitions',
+                score: isDeepfake ? 60 + Math.random() * 35 : 5 + Math.random() * 10,
+                description: 'Analysis of speech phoneme transitions and naturalness'
+              },
+              {
+                name: 'Breathing Patterns',
+                score: isDeepfake ? 75 + Math.random() * 20 : 15 + Math.random() * 10,
+                description: 'Detection of natural breathing patterns in speech'
+              }
+            ],
+            metadata: [
+              {
+                name: 'Compression Analysis',
+                score: isDeepfake ? 55 + Math.random() * 30 : 10 + Math.random() * 25,
+                description: 'Analysis of audio compression artifacts and patterns'
+              },
+              {
+                name: 'Metadata Consistency',
+                score: isDeepfake ? 50 + Math.random() * 45 : 5 + Math.random() * 20,
+                description: 'Evaluation of audio file metadata integrity'
+              }
+            ]
+          },
+          anomalies: isDeepfake 
+            ? [
+                'Unnatural phoneme transitions detected',
+                'Missing breath sounds between phrases', 
+                'Irregular spectral patterns in high frequencies',
+                'Suspicious audio compression artifacts'
+              ].slice(0, 2 + Math.floor(Math.random() * 3))
+            : []
+        };
+        
+        resolve(result);
+      } else {
+        // Existing visual media analysis (images, videos)
+        const result: AnalysisResult = {
+          id: `AF-${Date.now().toString(36)}`,
+          filename: file.name,
+          fileType: file.type.includes('image') ? 'image' : 'video',
+          fileSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+          uploadDate: new Date().toISOString(),
+          isDeepfake: isDeepfake,
+          confidenceScore: Number(confidenceScore.toFixed(1)),
+          processingTime: `${(1 + Math.random() * 4).toFixed(1)} seconds`,
+          modelInfo: [
             {
-              name: 'Compression Analysis',
-              score: isDeepfake ? 55 + Math.random() * 30 : 10 + Math.random() * 25,
-              description: 'Analysis of compression artifacts and patterns'
+              name: "DeepfaceForensics++",
+              version: "v3.2.1",
+              confidence: isDeepfake ? 82.7 : 17.3,
+              specialization: "Facial manipulation detection",
+              datasetTraining: ["FaceForensics++", "DFDC", "Celeb-DF"]
             },
             {
-              name: 'Metadata Consistency',
-              score: isDeepfake ? 50 + Math.random() * 45 : 5 + Math.random() * 20,
-              description: 'Evaluation of file metadata integrity'
+              name: "LAMA-Detector",
+              version: "v2.0.5",
+              confidence: isDeepfake ? 76.3 : 23.7,
+              specialization: "Large Mask removal artifacts",
+              datasetTraining: ["WildDeepfake", "DeepfakeFFPP", "ForgeryNet"]
+            },
+            {
+              name: "TemporalConsistency",
+              version: "v1.8.3",
+              confidence: isDeepfake ? 79.5 : 20.5,
+              specialization: "Video frame temporal inconsistencies",
+              datasetTraining: ["DFDC", "DeeperForensics-1.0", "FaceShifter"]
             }
           ],
-          visual: [
-            {
-              name: 'Lighting Inconsistency',
-              score: isDeepfake ? 65 + Math.random() * 25 : 10 + Math.random() * 15,
-              description: 'Detection of inconsistent lighting and shadows'
-            },
-            {
-              name: 'Boundary Detection',
-              score: isDeepfake ? 70 + Math.random() * 20 : 5 + Math.random() * 15,
-              description: 'Analysis of facial boundaries and masking artifacts'
-            },
-            {
-              name: 'Motion Analysis',
-              score: isDeepfake ? 60 + Math.random() * 30 : 10 + Math.random() * 20,
-              description: 'Evaluation of natural movement patterns'
-            }
-          ]
-        },
-        anomalies: isDeepfake 
-          ? [
-              'Unnatural eye movement detected',
-              'Facial boundary inconsistencies', 
-              'Irregular light reflection patterns',
-              'Abnormal compression artifacts around facial region'
-            ].slice(0, 2 + Math.floor(Math.random() * 3))
-          : []
-      };
-      
-      resolve(result);
+          analysisDetails: {
+            facial: [
+              {
+                name: 'Face Inconsistency',
+                score: isDeepfake ? 65 + Math.random() * 30 : 10 + Math.random() * 20,
+                description: 'Analysis of facial structure and features consistency between frames'
+              },
+              {
+                name: 'Eye Blinking',
+                score: isDeepfake ? 70 + Math.random() * 25 : 5 + Math.random() * 15,
+                description: 'Detection of natural eye blinking patterns'
+              },
+              {
+                name: 'Lip Sync',
+                score: isDeepfake ? 60 + Math.random() * 35 : 5 + Math.random() * 10,
+                description: 'Analysis of lip movement synchronization with audio'
+              }
+            ],
+            metadata: [
+              {
+                name: 'Compression Analysis',
+                score: isDeepfake ? 55 + Math.random() * 30 : 10 + Math.random() * 25,
+                description: 'Analysis of compression artifacts and patterns'
+              },
+              {
+                name: 'Metadata Consistency',
+                score: isDeepfake ? 50 + Math.random() * 45 : 5 + Math.random() * 20,
+                description: 'Evaluation of file metadata integrity'
+              }
+            ],
+            visual: [
+              {
+                name: 'Lighting Inconsistency',
+                score: isDeepfake ? 65 + Math.random() * 25 : 10 + Math.random() * 15,
+                description: 'Detection of inconsistent lighting and shadows'
+              },
+              {
+                name: 'Boundary Detection',
+                score: isDeepfake ? 70 + Math.random() * 20 : 5 + Math.random() * 15,
+                description: 'Analysis of facial boundaries and masking artifacts'
+              },
+              {
+                name: 'Motion Analysis',
+                score: isDeepfake ? 60 + Math.random() * 30 : 10 + Math.random() * 20,
+                description: 'Evaluation of natural movement patterns'
+              }
+            ]
+          },
+          anomalies: isDeepfake 
+            ? [
+                'Unnatural eye movement detected',
+                'Facial boundary inconsistencies', 
+                'Irregular light reflection patterns',
+                'Abnormal compression artifacts around facial region'
+              ].slice(0, 2 + Math.floor(Math.random() * 3))
+            : []
+        };
+        
+        resolve(result);
+      }
     }, 3000); // Simulate processing time
   });
 };
 
-const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
+const AnalysisResults = ({ file, onReset, mediaType = 'visual' }: AnalysisResultsProps) => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [progress, setProgress] = useState(0);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [activeModelTab, setActiveModelTab] = useState<string>("model1");
   const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
@@ -187,7 +272,7 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
     }, 300);
 
     // Generate mock analysis result
-    generateMockAnalysis(file).then((result) => {
+    generateMockAnalysis(file, mediaType).then((result) => {
       if (mounted) {
         setProgress(100);
         setTimeout(() => {
@@ -201,7 +286,7 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
       mounted = false;
       clearInterval(interval);
     };
-  }, [file]);
+  }, [file, mediaType]);
 
   if (isProcessing) {
     return (
@@ -217,15 +302,26 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
             <div className="relative w-20 h-20 mb-4">
               <div className="absolute inset-0 rounded-full border-4 border-t-primary border-r-primary border-b-muted border-l-muted animate-spin-slow"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <Shield className="h-10 w-10 text-primary" />
+                {mediaType === 'audio' ? (
+                  <FileAudio className="h-10 w-10 text-primary" />
+                ) : (
+                  <Shield className="h-10 w-10 text-primary" />
+                )}
               </div>
             </div>
             <Progress value={progress} className="w-full max-w-md h-2 mt-4" />
             <p className="text-sm text-muted-foreground mt-2">
-              {progress < 30 ? 'Initializing neural network models...' : 
-               progress < 60 ? 'Analyzing facial features and patterns...' : 
-               progress < 90 ? 'Processing temporal inconsistencies...' :
-               'Finalizing results and generating report...'}
+              {mediaType === 'audio' ? (
+                progress < 30 ? 'Initializing audio analysis models...' : 
+                progress < 60 ? 'Analyzing spectral patterns and features...' : 
+                progress < 90 ? 'Processing temporal inconsistencies...' :
+                'Finalizing results and generating report...'
+              ) : (
+                progress < 30 ? 'Initializing neural network models...' : 
+                progress < 60 ? 'Analyzing facial features and patterns...' : 
+                progress < 90 ? 'Processing temporal inconsistencies...' :
+                'Finalizing results and generating report...'
+              )}
             </p>
           </div>
         </CardContent>
@@ -318,7 +414,7 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
             }
             <AlertTitle>
               {analysis.isDeepfake ? 
-                "Deepfake Detected" : 
+                `${analysis.fileType === 'audio' ? 'Voice' : 'Visual'} Deepfake Detected` : 
                 "No Deepfake Detected"
               }
             </AlertTitle>
@@ -411,49 +507,81 @@ const AnalysisResults = ({ file, onReset }: AnalysisResultsProps) => {
         )}
 
         {/* Detailed Analysis Tabs */}
-        <Tabs defaultValue="facial" className="mt-6">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="facial">Facial Analysis</TabsTrigger>
-            <TabsTrigger value="visual">Visual Analysis</TabsTrigger>
-            <TabsTrigger value="metadata">Metadata Analysis</TabsTrigger>
+        <Tabs defaultValue={analysis.fileType === 'audio' ? "audio" : "facial"} className="mt-6">
+          <TabsList className="grid grid-cols-2 mb-4">
+            {analysis.fileType === 'audio' ? (
+              <>
+                <TabsTrigger value="audio">Audio Analysis</TabsTrigger>
+                <TabsTrigger value="metadata">Metadata Analysis</TabsTrigger>
+              </>
+            ) : (
+              <>
+                <TabsTrigger value="facial">Facial Analysis</TabsTrigger>
+                <TabsTrigger value="visual">Visual Analysis</TabsTrigger>
+                <TabsTrigger value="metadata">Metadata Analysis</TabsTrigger>
+              </>
+            )}
           </TabsList>
           
-          <TabsContent value="facial" className="space-y-4">
-            {analysis.analysisDetails.facial.map((detail, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">{detail.name}</h4>
-                    <p className="text-sm text-muted-foreground">{detail.description}</p>
+          {analysis.fileType === 'audio' && (
+            <TabsContent value="audio" className="space-y-4">
+              {analysis.analysisDetails.audio?.map((detail, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{detail.name}</h4>
+                      <p className="text-sm text-muted-foreground">{detail.description}</p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${scoreColor(detail.score)}`}>
+                      {detail.score.toFixed(1)}%
+                    </span>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${scoreColor(detail.score)}`}>
-                    {detail.score.toFixed(1)}%
-                  </span>
+                  <Progress value={detail.score} className="h-2" />
                 </div>
-                <Progress value={detail.score} className="h-2" />
-              </div>
-            ))}
-          </TabsContent>
+              ))}
+            </TabsContent>
+          )}
           
-          <TabsContent value="visual" className="space-y-4">
-            {analysis.analysisDetails.visual.map((detail, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">{detail.name}</h4>
-                    <p className="text-sm text-muted-foreground">{detail.description}</p>
+          {analysis.fileType !== 'audio' && (
+            <>
+              <TabsContent value="facial" className="space-y-4">
+                {analysis.analysisDetails.facial?.map((detail, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{detail.name}</h4>
+                        <p className="text-sm text-muted-foreground">{detail.description}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${scoreColor(detail.score)}`}>
+                        {detail.score.toFixed(1)}%
+                      </span>
+                    </div>
+                    <Progress value={detail.score} className="h-2" />
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${scoreColor(detail.score)}`}>
-                    {detail.score.toFixed(1)}%
-                  </span>
-                </div>
-                <Progress value={detail.score} className="h-2" />
-              </div>
-            ))}
-          </TabsContent>
+                ))}
+              </TabsContent>
+              
+              <TabsContent value="visual" className="space-y-4">
+                {analysis.analysisDetails.visual?.map((detail, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{detail.name}</h4>
+                        <p className="text-sm text-muted-foreground">{detail.description}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${scoreColor(detail.score)}`}>
+                        {detail.score.toFixed(1)}%
+                      </span>
+                    </div>
+                    <Progress value={detail.score} className="h-2" />
+                  </div>
+                ))}
+              </TabsContent>
+            </>
+          )}
           
           <TabsContent value="metadata" className="space-y-4">
-            {analysis.analysisDetails.metadata.map((detail, index) => (
+            {analysis.analysisDetails.metadata?.map((detail, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
