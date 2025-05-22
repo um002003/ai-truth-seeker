@@ -125,16 +125,16 @@ const Analyze = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2 text-blue-800">
                   <Shield className="h-4 w-4" />
-                  Law Enforcement Features
+                  AI/ML Models in Our System
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="list-disc pl-5 space-y-1 text-sm text-blue-900">
-                  <li>Chain of custody tracking</li>
-                  <li>Court-admissible forensic reports</li>
-                  <li>Evidence classification system</li>
-                  <li>Multi-model AI analysis for improved accuracy</li>
-                  <li>Exportable documentation for case files</li>
+                  <li><strong>Visual Deepfake Detection:</strong> EfficientNet, XceptionNet, Vision Transformers</li>
+                  <li><strong>Video Analysis:</strong> Spatio-Temporal Networks (R(2+1)D), 3D-CNNs, Temporal Transformers</li>
+                  <li><strong>Audio Deepfake Detection:</strong> WaveFake, VoicePrint, SpectroGuard</li>
+                  <li><strong>Multi-model fusion:</strong> Weighted ensemble for improved accuracy</li>
+                  <li><strong>Training:</strong> FaceForensics++, Celeb-DF, DFDC, ASVspoof datasets</li>
                 </ul>
               </CardContent>
             </Card>
